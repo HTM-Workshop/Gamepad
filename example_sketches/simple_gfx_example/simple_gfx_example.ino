@@ -19,13 +19,10 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
 #define BUTTON_UP 6
 #define BUTTON_LEFT 7
 #define BUTTON_RIGHT 10
-#define BUTTON_DOWN 9
-#define BUZZER 8
+#define BUTTON_DOWN 8
+#define BUZZER 9
 #define LED_LEFT 4
 #define LED_RIGHT 5
-
-uint8_t x = 0;
-uint8_t y = 0;
 
 void setup() {
     display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS);
