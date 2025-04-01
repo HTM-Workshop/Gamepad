@@ -8,6 +8,10 @@ U8GLIB_SSD1306_128X64 u8g(U8G_I2C_OPT_NONE);
 #define Data_of_right 650
 #define Data_of_up 100
 #define Data_of_down 950
+
+#define RIGHT 10
+#define LEFT 7
+
 int muban = 1;
 int Atmp;
 int Btmp;
@@ -24,29 +28,36 @@ int Data_of_sensor_RMB = 0;
 void setup() {
 
     Serial.begin(9600);
-    pinMode(Direction, INPUT);
-    pinMode(Direction_RMB, INPUT);
+//    pinMode(Direction, INPUT);
+//    pinMode(Direction_RMB, INPUT);
+    pinMode(RIGHT, INPUT);
+    pinMode(LEFT, INPUT);
     start();
 }
 
 void loop() {
     muban = 1;
-    Data_of_sensor = analogRead(Direction);
-    Data_of_sensor_RMB = analogRead(Direction_RMB);
-    if (Data_of_sensor <= Data_of_left) {
-        WX -= 5;
-    }
-    if (Data_of_sensor >= Data_of_right) {
+//    Data_of_sensor = analogRead(Direction);
+//    Data_of_sensor_RMB = analogRead(Direction_RMB);
+//    if (Data_of_sensor <= Data_of_left) {
+//        WX -= 5;
+//    }
+//    if (Data_of_sensor >= Data_of_right) {
+//        WX += 5;
+//    }
+//    if (Data_of_sensor_RMB <= Data_of_up) {
+//        win();
+//    }
+//    if (Data_of_sensor_RMB >= Data_of_down) {
+//        Reset();
+//    } else {
+//        delay(1);
+//    }
+
+    if(!digitalRead(RIGHT))
         WX += 5;
-    }
-    if (Data_of_sensor_RMB <= Data_of_up) {
-        win();
-    }
-    if (Data_of_sensor_RMB >= Data_of_down) {
-        Reset();
-    } else {
-        delay(1);
-    }
+    if(!digitalRead(LEFT))
+        WX -= 5;
 
     if (WIN == true) win();
     if (WX < -(WL / 2)) WX = -(WL / 2);
@@ -106,6 +117,7 @@ void loop() {
 }
 
 void start() {
+    WIN = false;
     WL = 32;
     for (byte i = 1; i < DF; i++) {
         WL = WL / 2;

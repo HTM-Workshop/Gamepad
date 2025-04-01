@@ -175,10 +175,10 @@ const byte brickLogo[36][8] PROGMEM= {
 };
 
 
-#define KEY_LEFT    8
-#define KEY_RIGHT   6
-#define KEY_DOWN    10
-#define KEY_ROTATE  7
+#define KEY_LEFT    6
+#define KEY_RIGHT   8
+#define KEY_DOWN    7
+#define KEY_ROTATE  10
 
 #define PIEZO_PIN   9
 #define LED_PIN     4
@@ -1313,4 +1313,3 @@ void loop() {
     }
   }
 }
-
