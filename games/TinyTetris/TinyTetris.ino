@@ -256,6 +256,10 @@ void setup() {
   OLEDCommand(0x14);
   delay(20);
   OLEDCommand(OLED_NORMAL_DISPLAY);
+  delay(20);
+  OLEDCommand(0xA1);
+  delay(20);
+  OLEDCommand(0xC8);
 
   fillTetrisScreen(0);
 
