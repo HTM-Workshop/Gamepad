@@ -1,16 +1,13 @@
 
-/* Example Template */
-
 #include <SPI.h>
 #include <Wire.h>
-#include <Adafruit_GFX.h>
-#include <Adafruit_SSD1306.h>
+#include <U8g2lib.h>
 
 // OLED Screen
 #define SCREEN_WIDTH 128 // OLED display width, in pixels
 #define SCREEN_HEIGHT 64 // OLED display height, in pixels
 #define SCREEN_ADDRESS 0x3C
-Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
+U8G2_SSD1306_128X64_NONAME_1_HW_I2C display(U8G2_R0, /* reset=*/ U8X8_PIN_NONE);
 
 
 // Pin mapping for Version 2.1 of Gamepad
@@ -24,12 +21,21 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
 #define LED_LEFT 4
 #define LED_RIGHT 5
 
+
+
 void setup() {
-    display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS);
+    display.begin();
+    display.setFont(u8g2_font_profont11_tr);
     
 }
 
+
 void loop() {
 
+        // update display
+        display.firstPage();
+        do {
+            
+        } while(display.nextPage());
     
 }
