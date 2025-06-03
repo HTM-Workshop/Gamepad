@@ -37,13 +37,16 @@ void setup() {
 
 void loop() {
 
-    // clear dispay
-    display.clearBuffer();
-    
-
-    
-    // update display
-    display.sendBuffer();
-    delay(50);
-
+    // main loop
+    while(1) {
+        
+        // clear dispay
+        display.clearBuffer();
+        
+        // draw functions go here
+        
+        // update display
+        display.sendBuffer();
+        delay(50);
+    }
 }

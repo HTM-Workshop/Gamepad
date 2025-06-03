@@ -37,10 +37,15 @@ void setup() {
 
 void loop() {
 
+    // main loop
+    while(1) {
+        
         // update display
         display.firstPage();
         do {
             
+            // draw functions go here
+            
         } while(display.nextPage());
-    
+    }
 }
