@@ -1,9 +1,3 @@
-/*
-    This is the full framebuffer version of the example template.
-    It's less complicated to use, but uses a significant amount
-    of RAM.
-*/
-
 #include <SPI.h>
 #include <Wire.h>
 #include <U8g2lib.h>
@@ -43,17 +37,24 @@ typedef struct {
 
 #define CODE1_CHECKSUM 0xD99E
 #define CODE_LENGTH 10
-#define MESSAGE_BUFFER_LEN 14
-const uint8_t msg1[] = {
-    0x74, 0x69, 0x6E, 0x79, 0x75, 0x72, 0x6C, 0x2E, 
-    0x63, 0x6F, 0x6D, 0x2F
+#define IMG_WIDTH 27
+#define IMG_HEIGHT 27
+const PROGMEM uint8_t img_data[] = {
+    0x87, 0x47, 0x85, 0x84, 0x7B, 0x93, 0x7F, 0x7A, 
+    0xC5, 0xAD, 0x0D, 0xC6, 0xC1, 0xE0, 0x6B, 0x6B, 
+    0xC5, 0xB3, 0x1F, 0x39, 0x38, 0x82, 0x9B, 0x72, 
+    0xF9, 0x27, 0x70, 0x53, 0x58, 0xB9, 0x05, 0xBC, 
+    0x67, 0x42, 0x77, 0x41, 0x93, 0x6D, 0x86, 0xE9, 
+    0x4B, 0x90, 0xBE, 0x5C, 0xCD, 0x5C, 0x09, 0x29, 
+    0x42, 0x59, 0x73, 0xBA, 0x97, 0x7B, 0xB1, 0x19, 
+    0x29, 0x95, 0x16, 0x9A, 0xD0, 0xFB, 0xE0, 0x48, 
+    0x5F, 0xA1, 0xD5, 0x00, 0xDB, 0x48, 0x0B, 0xB6, 
+    0x3F, 0x9C, 0x00, 0xF1, 0x9F, 0x1C, 0xBF, 0x4A, 
+    0xF1, 0x25, 0x97, 0x34, 0xE7, 0xE2, 0xA2, 0xD8, 
+    0x7E, 0xFA, 0xEB, 0xB3, 0x91, 0x1E, 0x16, 0xC9, 
+    0xD5, 0x76, 0xFF, 0xF8, 0x90, 0x14, 0xA4, 0x23, 
+    0x53, 0xB4, 0x52, 0xB0
 };
-const uint8_t msg2[] = {
-    0x3F, 0xD9, 0x17, 0x1E, 0x2A, 0xE3, 0x1F, 0xCD, 
-    0xD7, 0xF2, 0x9B, 0x56, 0xED
-};
-uint8_t message_buffer[MESSAGE_BUFFER_LEN];
-
 
 
 // The enemy pixel 'speed'
@@ -125,15 +126,31 @@ bool key_sequence_check(const uint8_t keycode) {
         uint16_t checksum = crc16(key_history, CODE_LENGTH, index);
         switch(checksum) {
             case CODE1_CHECKSUM:
-                uint8_t idx = index;
-                for(uint8_t i = 0; i < sizeof(msg2); i++) {
-                    message_buffer[i] = 0;
-                    if(i >= MESSAGE_BUFFER_LEN)
-                        break;
-                    uint8_t mod = (((uint16_t)key_history[idx] * (uint16_t)i) + checksum) % 0xFF;
-                    message_buffer[i] = msg2[i] ^ mod;
-                    idx = (idx + 1) % CODE_LENGTH;
+                timer_stop();
+                const uint8_t scale_factor = 2;
+                uint8_t bytes_per_row = ceil((double)IMG_WIDTH / 8.0);
+                display.clearBuffer();
+                for(uint8_t y = 0; y < IMG_HEIGHT; y++) {
+                    for(uint8_t x = 0; x < bytes_per_row; x++) {
+                        uint8_t i = x + (y * bytes_per_row);
+                        uint8_t mod = (((uint32_t)key_history[(i + index) % CODE_LENGTH] * (uint32_t)i) + checksum) % 0xFF;
+                        uint8_t val = pgm_read_byte_near(img_data + i) ^ mod;
+                        for(uint8_t xi = 0; xi < 8; xi++) {
+                            if(xi + (x * 8) >= IMG_WIDTH)
+                                break;
+                            uint8_t x_pos = (xi * scale_factor) + (x * 8 * scale_factor);
+                            uint8_t y_pos = y * scale_factor;
+                            uint8_t bit = ((val >> xi) & 0x1);
+                            display.setDrawColor(bit);
+                            display.drawBox(x_pos + 37, y_pos + 5, scale_factor, scale_factor);
+                        }
+                    }
                 }
+                display.sendBuffer();
+                delay(1000);
+                display.setDrawColor(1);
+                while(!key_fetch()) {}
+                timer_start();
                 chars_since_last_a = 0;
                 return true;
             default:
@@ -221,7 +238,6 @@ void loop() {
     // begin game
     bool game_running = true;
     timer_start();
-    uint8_t message_reveal = false;
     
     // main loop
     while(1) {
@@ -249,9 +265,9 @@ void loop() {
                 break;      // exits the while loop and goes back to the loop() function.
             }
         }
+
         uint8_t code_status = key_sequence_check(key_fetch());
-        if(code_status)
-            message_reveal = 80;
+
 
 
         // == Update Game Logic ==
@@ -303,12 +319,6 @@ void loop() {
         if(game_running == false) {
             display.drawStr(35, line_offset * 3, "CAUGHT!");
             display.drawStr(0, line_offset * 4, "Press A to try again");
-        }
-
-        if(message_reveal > 0) {
-            display.drawStr(2, line_offset * 6, msg1);
-            display.drawStr(2, line_offset * 7, message_buffer);
-            message_reveal -= 1;
         }
         
         display.sendBuffer();
